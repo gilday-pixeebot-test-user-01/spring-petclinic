@@ -1,5 +1,7 @@
 package org.springframework.samples.petclinic.records;
 
+import io.openpixee.security.XMLInputFactorySecurity;
+import io.openpixee.security.ZipSecurity;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -19,14 +21,14 @@ class RecordsTransferController {
 	@PostMapping("/records-transfers")
 	public void newRecordsTransfer(@RequestParam("zipped") boolean zipped, @RequestBody InputStream body)
 			throws IOException {
-		final InputStream is = zipped ? new ZipInputStream(body) : body;
+		final InputStream is = zipped ? ZipSecurity.createHardenedInputStream(body) : body;
 		try (is) {
 			saveToRecordsSystem(is);
 		}
 	}
 
 	private void saveToRecordsSystem(final InputStream is) throws IOException {
-		final var factory = XMLInputFactory.newFactory();
+		final var factory = XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newFactory());
 		final XMLEventReader reader;
 		try {
 			reader = factory.createXMLEventReader(is);
