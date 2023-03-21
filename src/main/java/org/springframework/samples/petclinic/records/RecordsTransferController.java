@@ -1,4 +1,4 @@
-package org.springframework.samples.petclinic;
+package org.springframework.samples.petclinic.records;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -100,6 +100,11 @@
       <version>${webjars-font-awesome.version}</version>
     </dependency>
     <!-- end of webjars -->
+    <dependency>
+      <groupId>io.openpixee</groupId>
+      <artifactId>java-security-toolkit</artifactId>
+      <version>1.0.0</version>
+    </dependency>
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
