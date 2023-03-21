@@ -1,5 +1,6 @@
 package org.springframework.samples.petclinic;
 
+import io.openpixee.security.ZipSecurity;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,7 +16,7 @@ class RecordsTransferController {
 	@PostMapping("/records-transfers")
 	public void newRecordsTransfer(@RequestParam("zipped") boolean zipped, @RequestBody InputStream body)
 			throws IOException {
-		final InputStream is = zipped ? new ZipInputStream(body) : body;
+		final InputStream is = zipped ? ZipSecurity.createHardenedInputStream(body) : body;
 		try (is) {
 			saveToRecordsSystem(is);
 		}
