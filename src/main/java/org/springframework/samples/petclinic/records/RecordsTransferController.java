@@ -1,5 +1,6 @@
 package org.springframework.samples.petclinic.records;
 
+import io.openpixee.security.XMLInputFactorySecurity;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -31,7 +32,7 @@ class RecordsTransferController {
 	}
 
 	private String readRecordId(final Path path) throws IOException {
-		final var factory = XMLInputFactory.newFactory();
+		final var factory = XMLInputFactorySecurity.hardenFactory(XMLInputFactory.newFactory());
 		try (var reader = Files.newBufferedReader(path)) {
 			final var xmlEventReader = factory.createXMLEventReader(reader);
 			while (xmlEventReader.hasNext()) {
