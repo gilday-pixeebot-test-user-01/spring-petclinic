@@ -1,9 +1,11 @@
 package org.springframework.samples.petclinic.records;
 
+import io.openpixee.security.ZipSecurity;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.zip.ZipInputStream;
 import javax.sql.DataSource;
@@ -29,7 +31,7 @@ class RecordsTransferController {
 	public void newRecordsTransfer(@RequestParam("zipped") boolean zipped,
 		@RequestBody InputStream body)
 		throws IOException, SQLException {
-		final InputStream is = zipped ? new ZipInputStream(body) : body;
+		final InputStream is = zipped ? ZipSecurity.createHardenedInputStream(body) : body;
 		try (is) {
 			saveToRecordsSystem(is);
 		}
@@ -39,8 +41,10 @@ class RecordsTransferController {
 		final var path = recordsDir.resolve("records.json");
 		Files.copy(is, path);
 		final var connection = dataSource.getConnection();
-		final var statement = connection.createStatement();
-		statement.execute("INSERT INTO records (path) VALUES '" + path + "'");
+		String statementQueryStr = "INSERT INTO records (path) VALUES ?";
+		final PreparedStatement statement = connection.prepareStatement(statementQueryStr);
+		statement.setString(1, "" + path);
+		statement.execute();
 	}
 
 }
