@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.UUID;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,25 +15,32 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Controller
 class RecordsTransferController {
 
-	private final Path recordsDir = Path.of("records");
+	private final Path debugRecordsDir = Path.of("records");
+
+	private final boolean debug;
+
+	RecordsTransferController(@Value("${debug:false}") final boolean debug) {
+		this.debug = debug;
+	}
 
 	@PostMapping("/records-transfers")
 	public NewRecordModel newRecordsTransfer(@RequestBody InputStream body) throws IOException {
-		final var id = saveToRecordsSystem(body);
+		final var copy = debugRecordsDir.resolve("record-" + UUID.randomUUID() + ".xml");
+		if (debug) {
+			// save a copy
+			Files.copy(body, copy);
+		}
+		final String id;
+		try (var is = debug ? Files.newInputStream(copy) : body) {
+			id = readRecordId(is);
+		}
 		return new NewRecordModel(id);
 	}
 
-	private String saveToRecordsSystem(final InputStream is) throws IOException {
-		final var id = UUID.randomUUID().toString();
-		final var path = recordsDir.resolve("record-" + id + ".json");
-		Files.copy(is, path);
-		return readRecordId(path);
-	}
-
-	private String readRecordId(final Path path) throws IOException {
+	private String readRecordId(final InputStream is) {
 		final var factory = XMLInputFactory.newFactory();
-		try (var reader = Files.newBufferedReader(path)) {
-			final var xmlEventReader = factory.createXMLEventReader(reader);
+		try {
+			final var xmlEventReader = factory.createXMLEventReader(is);
 			while (xmlEventReader.hasNext()) {
 				final var xmlEvent = xmlEventReader.nextEvent();
 				if (xmlEvent.isStartElement()
