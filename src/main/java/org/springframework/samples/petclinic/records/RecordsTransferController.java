@@ -5,11 +5,13 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
+import java.util.zip.ZipInputStream;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 class RecordsTransferController {
@@ -17,8 +19,13 @@ class RecordsTransferController {
 	private final Path recordsDir = Path.of("records");
 
 	@PostMapping("/records-transfers")
-	public NewRecordModel newRecordsTransfer(@RequestBody InputStream body) throws IOException {
-		final var id = saveToRecordsSystem(body);
+	public NewRecordModel newRecordsTransfer(@RequestParam("zipped") boolean zipped, @RequestBody InputStream body)
+			throws IOException {
+		final InputStream is = zipped ? new ZipInputStream(body) : body;
+		final String id;
+		try (is) {
+			id = saveToRecordsSystem(is);
+		}
 		return new NewRecordModel(id);
 	}
 
