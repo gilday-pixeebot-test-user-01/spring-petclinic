@@ -26,7 +26,7 @@
     <jacoco.version>0.8.7</jacoco.version>
     <nohttp-checkstyle.version>0.0.10</nohttp-checkstyle.version>
     <spring-format.version>0.0.31</spring-format.version>
-
+    <versions.java-security-toolkit>1.0.7</versions.java-security-toolkit>
   </properties>
 
   <dependencies>
@@ -105,6 +105,10 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-devtools</artifactId>
       <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.github.pixee</groupId>
+      <artifactId>java-security-toolkit</artifactId>
     </dependency>
   </dependencies>
 
@@ -388,5 +392,13 @@
       </build>
     </profile>
   </profiles>
-
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.github.pixee</groupId>
+        <artifactId>java-security-toolkit</artifactId>
+        <version>${versions.java-security-toolkit}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 </project>
